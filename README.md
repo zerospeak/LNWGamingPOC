@@ -3,7 +3,7 @@
 
 ---
 
-# **1. Executive Summary**  
+# **1.a Executive Summary**  
 **Objective:** Develop **CasinoOps360**, an AI-driven casino management system leveraging LNW Gaming’s expertise in software engineering, casino operations, and database technologies. The system will automate slot monitoring, player loyalty management, compliance reporting, and cross-site integration.  
 
 **Key Value Propositions:**  
@@ -13,7 +13,312 @@
 - **Scalability:** Cloud-ready architecture supporting multi-site deployments.  
 
 ---
+## System Flow Diagrams for CasinoOps360
 
+### 1.b System Architecture Overview
+
+```mermaid
+flowchart TD
+    classDef frontend fill:#f9d71c,stroke:#333,color:#000
+    classDef backend fill:#a8e6cf,stroke:#333,color:#000
+    classDef database fill:#ffd3b6,stroke:#333,color:#000
+    classDef monitoring fill:#ffaaa5,stroke:#333,color:#000
+    classDef compliance fill:#ff8b94,stroke:#333,color:#000
+
+    subgraph Frontend["Frontend Layer"]
+        WebPortal["Web Portal"]:::frontend
+        MobileApp["Mobile App"]:::frontend
+        SlotAPI["Slot Machine API"]:::frontend
+    end
+
+    subgraph Backend["Backend Services"]
+        direction TB
+        CoreServices["Core Services"]:::backend
+        LoyaltyEngine["Loyalty Engine"]:::backend
+        ComplianceService["Compliance Service"]:::backend
+        
+        subgraph Processing["Processing Layer"]
+            RealtimeProc["Real-time Processing"]:::backend
+            BatchProc["Batch Processing"]:::backend
+        end
+    end
+
+    subgraph Storage["Data Storage"]
+        direction TB
+        SQLServer["SQL Server Cluster"]:::database
+        DB2["IBM DB2"]:::database
+        AzureBlob["Azure Blob Storage"]:::database
+    end
+
+    subgraph Monitoring["Monitoring & Analytics"]
+        direction TB
+        PowerBI["Power BI Dashboards"]:::monitoring
+        SSRS["SSRS Reports"]:::monitoring
+        Telemetry["System Telemetry"]:::monitoring
+    end
+
+    subgraph Compliance["Compliance Layer"]
+        direction TB
+        GDPR["GDPR Processing"]:::compliance
+        CCPA["CCPA Processing"]:::compliance
+        AuditTrail["Audit Trail System"]:::compliance
+    end
+
+    WebPortal --> CoreServices
+    MobileApp --> CoreServices
+    SlotAPI --> RealtimeProc
+    
+    CoreServices --> SQLServer
+    CoreServices --> DB2
+    LoyaltyEngine --> BatchProc
+    ComplianceService --> AzureBlob
+    
+    RealtimeProc --> PowerBI
+    BatchProc --> SSRS
+    Telemetry --> AuditTrail
+    
+    GDPR --> AuditTrail
+    CCPA --> AuditTrail
+```
+
+The architecture diagram above illustrates the complete CasinoOps360 system, where:
+
+- Yellow components represent frontend interfaces
+- Green components show backend services and processing layers
+- Orange represents database storage solutions
+- Pink indicates monitoring and analytics tools
+- Red highlights compliance-related components
+
+### 1.c Database Schema Flow
+
+```mermaid
+erDiagram
+    PLAYERS ||--o{ PLAYER_TRANSACTIONS : makes
+    PLAYERS {
+        string PlayerID PK
+        string Name
+        string Email
+        datetime CreatedDate
+        int TotalWager
+        string CurrentTier
+        datetime LastUpdated
+    }
+    
+    PLAYER_TRANSACTIONS ||--|| TIER_HISTORY : updates
+    PLAYER_TRANSACTIONS {
+        int TransactionID PK
+        string PlayerID FK
+        decimal Amount
+        datetime Timestamp
+        string GameType
+    }
+    
+    TIER_HISTORY {
+        int HistoryID PK
+        string PlayerID FK
+        string OldTier
+        string NewTier
+        datetime ChangeDate
+    }
+    
+    SLOT_MACHINES ||--o{ SLOT_METRICS : generates
+    SLOT_MACHINES {
+        string MachineID PK
+        string Location
+        string GameType
+        int MaxBet
+        datetime LastMaintenance
+    }
+    
+    SLOT_METRICS {
+        int MetricID PK
+        string MachineID FK
+        decimal Revenue
+        int Spins
+        datetime CollectionTime
+    }
+    
+    COMPLIANCE_REPORTS ||--o{ AUDIT_TRAIL : tracks
+    COMPLIANCE_REPORTS {
+        int ReportID PK
+        string ReportType
+        datetime GenerationDate
+        string Status
+        string RegulatorID
+    }
+    
+    AUDIT_TRAIL {
+        int AuditID PK
+        string ReportID FK
+        datetime ActionTime
+        string ActionType
+        string UserID
+        string Details
+    }
+```
+
+The entity relationship diagram above illustrates the core database structure, where:
+
+- Lines with crow's feet (||--o{) indicate one-to-many relationships (e.g., one player can have many transactions)
+- PK indicates Primary Keys (unique identifiers)
+- FK indicates Foreign Keys (references to other tables)
+- The schema supports GDPR/CCPA compliance through pseudonymized PlayerIDs
+- Audit trails track all changes to sensitive data
+
+### 1.d Slot Machine Monitoring Flow
+
+```mermaid
+sequenceDiagram
+    participant SM as Slot Machine
+    participant API as REST API
+    participant Monitor as PowerShell Monitor
+    participant DB as SQL Server
+    participant Alert as Alert System
+    
+    loop Every 5 Minutes
+        SM->>+API: Send Telemetry Data
+        API->>Monitor: Forward Metrics
+        
+        alt Utilization > 85%
+            Monitor->>DB: Log Critical Status
+            Monitor->>Alert: Generate Alert
+            Alert->>Email: Send Notification
+        else Normal Operation
+            Monitor->>DB: Update Metrics
+        end
+        
+        Monitor->>-API: Complete Processing
+        API->>-SM: Acknowledge Receipt
+    end
+```
+
+The sequence diagram above shows the slot machine monitoring process, where:
+
+- The loop runs every 5 minutes to balance monitoring frequency with system load
+- Participants represent different system components:
+  - Slot Machine: Physical gaming device
+  - REST API: Central endpoint for telemetry collection
+  - PowerShell Monitor: Daemon process implementing the monitoring logic
+  - SQL Server: Storage for metrics and alerts
+  - Alert System: Notification handler for critical events
+
+
+- Critical thresholds trigger immediate action when utilization exceeds 85%
+- All interactions are logged for audit purposes
+
+### 1.e Loyalty Program Automation Flow
+
+```mermaid
+flowchart TD
+    classDef frontend fill:#f9d71c,stroke:#333,color:#000
+    classDef backend fill:#a8e6cf,stroke:#333,color:#000
+    classDef database fill:#ffd3b6,stroke:#333,color:#000
+    classDef monitoring fill:#ffaaa5,stroke:#333,color:#000
+    classDef compliance fill:#ff8b94,stroke:#333,color:#000
+
+    subgraph Frontend["Frontend Layer"]
+        WebPortal["Web Portal"]:::frontend
+        MobileApp["Mobile App"]:::frontend
+        SlotAPI["Slot Machine API"]:::frontend
+    end
+
+    subgraph Backend["Backend Services"]
+        direction TB
+        CoreServices["Core Services"]:::backend
+        LoyaltyEngine["Loyalty Engine"]:::backend
+        ComplianceService["Compliance Service"]:::backend
+        
+        subgraph Processing["Processing Layer"]
+            RealtimeProc["Real-time Processing"]:::backend
+            BatchProc["Batch Processing"]:::backend
+        end
+    end
+
+    subgraph Storage["Data Storage"]
+        direction TB
+        SQLServer["SQL Server Cluster"]:::database
+        DB2["IBM DB2"]:::database
+        AzureBlob["Azure Blob Storage"]:::database
+    end
+
+    subgraph Monitoring["Monitoring & Analytics"]
+        direction TB
+        PowerBI["Power BI Dashboards"]:::monitoring
+        SSRS["SSRS Reports"]:::monitoring
+        Telemetry["System Telemetry"]:::monitoring
+    end
+
+    subgraph Compliance["Compliance Layer"]
+        direction TB
+        GDPR["GDPR Processing"]:::compliance
+        CCPA["CCPA Processing"]:::compliance
+        AuditTrail["Audit Trail System"]:::compliance
+    end
+
+    WebPortal --> CoreServices
+    MobileApp --> CoreServices
+    SlotAPI --> RealtimeProc
+    
+    CoreServices --> SQLServer
+    CoreServices --> DB2
+    LoyaltyEngine --> BatchProc
+    ComplianceService --> AzureBlob
+    
+    RealtimeProc --> PowerBI
+    BatchProc --> SSRS
+    Telemetry --> AuditTrail
+    
+    GDPR --> AuditTrail
+    CCPA --> AuditTrail
+```
+
+```mermaid
+sequenceDiagram
+    participant Scheduler as Scheduled Task
+    participant PowerShell as Update-Tier Script
+    participant DB as Player Database
+    participant API as Loyalty API
+    participant Audit as Tier History
+
+    Note over Scheduler,Audit: Daily Tier Update Process (2 AM)
+
+    Scheduler->>+PowerShell: Trigger Update-Tier Script
+    activate PowerShell
+    
+    PowerShell->>+DB: Query Players LastUpdated < Yesterday
+    activate DB
+    DB-->>-PowerShell: Return Player List
+    deactivate DB
+
+    loop For Each Player
+        PowerShell->>+DB: Get TotalWager
+        activate DB
+        DB-->>-PowerShell: Return Wager Amount
+        deactivate DB
+        
+        alt New Tier Different from Current
+            PowerShell->>API: PUT /players/{PlayerID}/tier
+            API-->>PowerShell: Confirm Tier Change
+            
+            PowerShell->>+Audit: Log Tier Change
+            activate Audit
+            Audit-->>-PowerShell: Confirm Logged
+            deactivate Audit
+        end
+    end
+
+    PowerShell->>-Scheduler: Complete Processing
+    deactivate PowerShell
+```
+
+This completes our system flow diagrams section, providing comprehensive visual documentation of CasinoOps360's architecture and core processes. The four diagrams together cover:
+
+1. Overall System Architecture: Showing component relationships and data flow
+2. Database Schema: Illustrating entity relationships and compliance tracking
+3. Slot Machine Monitoring: Detailing the real-time monitoring process
+4. Loyalty Program Automation: Outlining the daily tier update workflow
+
+These diagrams support the technical requirements outlined in the CasinoOps360 Professional Technical Implementation Document and provide a clear foundation for system development and maintenance.
 # **2. Technical Requirements**  
 ### **2.1 Core Technologies**  
 | Component          | Tools/Stack                          | Rationale                                   |  
